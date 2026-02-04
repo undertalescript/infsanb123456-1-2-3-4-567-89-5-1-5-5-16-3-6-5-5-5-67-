@@ -1,0 +1,294 @@
+local Teleport = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/dist/main.lua"))()
+local Window = Teleport:CreateWindow({
+    Theme = "Dark",
+    Title = "你已急哭",
+    Size = UDim2.fromOffset(400, 450),
+    Transparent = true
+})
+local Tab = Window:Tab({
+    Icon = "map-pin",
+    Title = "关卡列表"
+})
+local Button = Tab:Button({
+    Title = "一次解锁所有关卡",
+    Callback = function(bI)
+        local FindFirstChild = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local PivotTo = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-4, 4, 98))
+        task.wait(0.5)
+        local PivotTo2 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-6, 4, 3))
+        task.wait(0.5)
+        local PivotTo3 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(18, 4, -101))
+        task.wait(0.5)
+        local PivotTo4 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(139, 17, -99))
+        task.wait(0.5)
+        local PivotTo5 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(406, 18, -131))
+        task.wait(0.5)
+        local PivotTo6 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(536, 18, -137))
+        task.wait(0.5)
+        local PivotTo7 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(435, 31, -615))
+        task.wait(0.5)
+        local PivotTo8 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(187, 31, -597))
+        task.wait(0.5)
+        local PivotTo9 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(24, 48, -597))
+        task.wait(0.5)
+        local PivotTo10 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-160, 47, -586))
+        task.wait(0.5)
+        local PivotTo11 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-339, 152, -602))
+        task.wait(0.5)
+        local Notify = Teleport:Notify({
+    Title = "解锁完成",
+    Content = "已运行全关卡自动传送",
+    Duration = 2
+})
+    end,
+    Desc = "自动依次触碰存档点"
+})
+local Button2 = Tab:Button({
+    Title = "第0关",
+    Callback = function(bI)
+        local Dialog = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第0关 吗？",
+    Icon = "alert-circle"
+})
+        local Show = Dialog:Show()
+    end,
+    Desc = "立即前往 第0关"
+})
+local Button3 = Tab:Button({
+    Title = "第1关",
+    Callback = function(bI)
+        local Dialog2 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第1关 吗？",
+    Icon = "alert-circle"
+})
+        local Show2 = Dialog2:Show()
+    end,
+    Desc = "立即前往 第1关"
+})
+local Button4 = Tab:Button({
+    Title = "第2关",
+    Callback = function(bI)
+        local Dialog3 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第2关 吗？",
+    Icon = "alert-circle"
+})
+        local Show3 = Dialog3:Show()
+    end,
+    Desc = "立即前往 第2关"
+})
+local Button5 = Tab:Button({
+    Title = "第3关",
+    Callback = function(bI)
+        local Dialog4 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第3关 吗？",
+    Icon = "alert-circle"
+})
+        local Show4 = Dialog4:Show()
+    end,
+    Desc = "立即前往 第3关"
+})
+local Button6 = Tab:Button({
+    Title = "第4关",
+    Callback = function(bI)
+        local Dialog5 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第4关 吗？",
+    Icon = "alert-circle"
+})
+        local Show5 = Dialog5:Show()
+    end,
+    Desc = "立即前往 第4关"
+})
+local Button7 = Tab:Button({
+    Title = "第5关",
+    Callback = function(bI)
+        local Dialog6 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第5关 吗？",
+    Icon = "alert-circle"
+})
+        local Show6 = Dialog6:Show()
+    end,
+    Desc = "立即前往 第5关"
+})
+local Button8 = Tab:Button({
+    Title = "第6关",
+    Callback = function(bI)
+        local Dialog7 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第6关 吗？",
+    Icon = "alert-circle"
+})
+        local Show7 = Dialog7:Show()
+    end,
+    Desc = "立即前往 第6关"
+})
+local Button9 = Tab:Button({
+    Title = "第7关",
+    Callback = function(bI)
+        local Dialog8 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第7关 吗？",
+    Icon = "alert-circle"
+})
+        local Show8 = Dialog8:Show()
+    end,
+    Desc = "立即前往 第7关"
+})
+local Button10 = Tab:Button({
+    Title = "第8关",
+    Callback = function(bI)
+        local Dialog9 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第8关 吗？",
+    Icon = "alert-circle"
+})
+        local Show9 = Dialog9:Show()
+    end,
+    Desc = "立即前往 第8关"
+})
+local Button11 = Tab:Button({
+    Title = "第9关",
+    Callback = function(bI)
+        local Dialog10 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第9关 吗？",
+    Icon = "alert-circle"
+})
+        local Show10 = Dialog10:Show()
+    end,
+    Desc = "立即前往 第9关"
+})
+local Button12 = Tab:Button({
+    Title = "第10关",
+    Callback = function(bI)
+        local Dialog11 = Window:Dialog({
+    Buttons = {
+        [1] = {
+            Callback = function() end,
+            Title = "确定"
+        },
+        [2] = {
+            Callback = function() end,
+            Title = "取消"
+        }
+    },
+    Title = "传送确认",
+    Content = "确定要前往 第10关 吗？",
+    Icon = "alert-circle"
+})
+        local Show11 = Dialog11:Show()
+    end,
+    Desc = "立即前往 第10关"
+})
+local Select = Tab:Select()
+local Notify2 = Teleport:Notify({
+    Title = "系统提示",
+    Content = "脚本加载完成 | By super_n00b
+请不要跳过超过两个关卡 否则会被封禁",
+    Duration = 3
+})
