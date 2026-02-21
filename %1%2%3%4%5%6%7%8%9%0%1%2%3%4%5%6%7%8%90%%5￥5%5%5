@@ -1,294 +1,224 @@
-local Teleport = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/dist/main.lua"))()
-local Window = Teleport:CreateWindow({
-    Theme = "Dark",
-    Title = "你已急哭",
-    Size = UDim2.fromOffset(400, 450),
-    Transparent = true
-})
-local Tab = Window:Tab({
-    Icon = "map-pin",
-    Title = "关卡列表"
-})
-local Button = Tab:Button({
-    Title = "一次解锁所有关卡",
-    Callback = function(bI)
-        local FindFirstChild = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local PivotTo = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-4, 4, 98))
-        task.wait(0.5)
-        local PivotTo2 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-6, 4, 3))
-        task.wait(0.5)
-        local PivotTo3 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(18, 4, -101))
-        task.wait(0.5)
-        local PivotTo4 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(139, 17, -99))
-        task.wait(0.5)
-        local PivotTo5 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(406, 18, -131))
-        task.wait(0.5)
-        local PivotTo6 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(536, 18, -137))
-        task.wait(0.5)
-        local PivotTo7 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(435, 31, -615))
-        task.wait(0.5)
-        local PivotTo8 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(187, 31, -597))
-        task.wait(0.5)
-        local PivotTo9 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(24, 48, -597))
-        task.wait(0.5)
-        local PivotTo10 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-160, 47, -586))
-        task.wait(0.5)
-        local PivotTo11 = game.Players.LocalPlayer.Character:PivotTo(CFrame.new(-339, 152, -602))
-        task.wait(0.5)
-        local Notify = Teleport:Notify({
-    Title = "解锁完成",
-    Content = "已运行全关卡自动传送",
-    Duration = 2
-})
-    end,
-    Desc = "自动依次触碰存档点"
-})
-local Button2 = Tab:Button({
-    Title = "第0关",
-    Callback = function(bI)
-        local Dialog = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第0关 吗？",
-    Icon = "alert-circle"
-})
-        local Show = Dialog:Show()
-    end,
-    Desc = "立即前往 第0关"
-})
-local Button3 = Tab:Button({
-    Title = "第1关",
-    Callback = function(bI)
-        local Dialog2 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第1关 吗？",
-    Icon = "alert-circle"
-})
-        local Show2 = Dialog2:Show()
-    end,
-    Desc = "立即前往 第1关"
-})
-local Button4 = Tab:Button({
-    Title = "第2关",
-    Callback = function(bI)
-        local Dialog3 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第2关 吗？",
-    Icon = "alert-circle"
-})
-        local Show3 = Dialog3:Show()
-    end,
-    Desc = "立即前往 第2关"
-})
-local Button5 = Tab:Button({
-    Title = "第3关",
-    Callback = function(bI)
-        local Dialog4 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第3关 吗？",
-    Icon = "alert-circle"
-})
-        local Show4 = Dialog4:Show()
-    end,
-    Desc = "立即前往 第3关"
-})
-local Button6 = Tab:Button({
-    Title = "第4关",
-    Callback = function(bI)
-        local Dialog5 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第4关 吗？",
-    Icon = "alert-circle"
-})
-        local Show5 = Dialog5:Show()
-    end,
-    Desc = "立即前往 第4关"
-})
-local Button7 = Tab:Button({
-    Title = "第5关",
-    Callback = function(bI)
-        local Dialog6 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第5关 吗？",
-    Icon = "alert-circle"
-})
-        local Show6 = Dialog6:Show()
-    end,
-    Desc = "立即前往 第5关"
-})
-local Button8 = Tab:Button({
-    Title = "第6关",
-    Callback = function(bI)
-        local Dialog7 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第6关 吗？",
-    Icon = "alert-circle"
-})
-        local Show7 = Dialog7:Show()
-    end,
-    Desc = "立即前往 第6关"
-})
-local Button9 = Tab:Button({
-    Title = "第7关",
-    Callback = function(bI)
-        local Dialog8 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第7关 吗？",
-    Icon = "alert-circle"
-})
-        local Show8 = Dialog8:Show()
-    end,
-    Desc = "立即前往 第7关"
-})
-local Button10 = Tab:Button({
-    Title = "第8关",
-    Callback = function(bI)
-        local Dialog9 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第8关 吗？",
-    Icon = "alert-circle"
-})
-        local Show9 = Dialog9:Show()
-    end,
-    Desc = "立即前往 第8关"
-})
-local Button11 = Tab:Button({
-    Title = "第9关",
-    Callback = function(bI)
-        local Dialog10 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第9关 吗？",
-    Icon = "alert-circle"
-})
-        local Show10 = Dialog10:Show()
-    end,
-    Desc = "立即前往 第9关"
-})
-local Button12 = Tab:Button({
-    Title = "第10关",
-    Callback = function(bI)
-        local Dialog11 = Window:Dialog({
-    Buttons = {
-        [1] = {
-            Callback = function() end,
-            Title = "确定"
-        },
-        [2] = {
-            Callback = function() end,
-            Title = "取消"
-        }
-    },
-    Title = "传送确认",
-    Content = "确定要前往 第10关 吗？",
-    Icon = "alert-circle"
-})
-        local Show11 = Dialog11:Show()
-    end,
-    Desc = "立即前往 第10关"
-})
-local Select = Tab:Select()
-local Notify2 = Teleport:Notify({
-    Title = "系统提示",
-    Content = "脚本加载完成 | By super_n00b
-请不要跳过超过两个关卡 否则会被封禁",
-    Duration = 3
-})
+-- 本地脚本 (LocalScript)
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- 获取本地玩家和角色
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- 创建飞行控制变量
+local isFlying = false
+local flyVelocity = Vector3.new(0, 0, 0)
+local joystickInput = Vector2.new(0, 0)
+local verticalInput = 0 -- 垂直方向输入（上升/下降）
+
+-- 创建飞行控制 GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FlightControlGui"
+screenGui.Parent = player.PlayerGui
+
+-- 摇杆背景
+local joystickBackground = Instance.new("Frame")
+joystickBackground.Name = "JoystickBackground"
+joystickBackground.Size = UDim2.new(0, 120, 0, 120)
+joystickBackground.Position = UDim2.new(0.1, 0, 0.7, 0)
+joystickBackground.AnchorPoint = Vector2.new(0.5, 0.5)
+joystickBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+joystickBackground.BackgroundTransparency = 0.5
+joystickBackground.BorderSizePixel = 0
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = joystickBackground
+joystickBackground.Parent = screenGui
+
+-- 摇杆手柄
+local joystickHandle = Instance.new("Frame")
+joystickHandle.Name = "JoystickHandle"
+joystickHandle.Size = UDim2.new(0, 50, 0, 50)
+joystickHandle.AnchorPoint = Vector2.new(0.5, 0.5)
+joystickHandle.Position = UDim2.new(0.5, 0, 0.5, 0)
+joystickHandle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+joystickHandle.BackgroundTransparency = 0.3
+local handleCorner = Instance.new("UICorner")
+handleCorner.CornerRadius = UDim.new(1, 0)
+handleCorner.Parent = joystickHandle
+joystickHandle.Parent = joystickBackground
+
+-- 上升/下降按钮
+local function createVerticalButton(name, position, text)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Size = UDim2.new(0, 60, 0, 60)
+    button.Position = position
+    button.AnchorPoint = Vector2.new(0.5, 0.5)
+    button.BackgroundColor3 = Color3.fromRGB(80, 80, 200)
+    button.BackgroundTransparency = 0.5
+    button.Text = text
+    button.TextScaled = true
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Parent = screenGui
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0.3, 0)
+    buttonCorner.Parent = button
+    
+    return button
+end
+
+local upButton = createVerticalButton("UpButton", UDim2.new(0.9, 0, 0.7, -40), "↑")
+local downButton = createVerticalButton("DownButton", UDim2.new(0.9, 0, 0.7, 40), "↓")
+
+-- 摇杆控制逻辑
+local function updateJoystick(input)
+    local joystickRadius = joystickBackground.AbsoluteSize.X / 2
+    local center = joystickBackground.AbsolutePosition + Vector2.new(joystickRadius, joystickRadius)
+    local relative = input.Position - center
+    
+    -- 限制在摇杆范围内
+    local distance = math.min(relative.Magnitude, joystickRadius)
+    local direction = relative.Unit
+    local newPosition = direction * distance
+    
+    -- 更新摇杆手柄位置
+    joystickHandle.Position = UDim2.new(
+        0.5, newPosition.X,
+        0.5, newPosition.Y
+    )
+    
+    -- 归一化输入 (-1 到 1)
+    joystickInput = Vector2.new(
+        newPosition.X / joystickRadius,
+        newPosition.Y / joystickRadius
+    )
+end
+
+-- 摇杆触摸事件
+joystickBackground.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        updateJoystick(input)
+        isFlying = true
+    end
+end)
+
+joystickBackground.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        updateJoystick(input)
+    end
+end)
+
+joystickBackground.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        -- 摇杆归位动画
+        local tween = TweenService:Create(
+            joystickHandle,
+            TweenInfo.new(0.2, Enum.EasingStyle.Quad),
+            {Position = UDim2.new(0.5, 0, 0.5, 0)}
+        )
+        tween:Play()
+        joystickInput = Vector2.new(0, 0)
+    end
+end)
+
+-- 垂直控制
+upButton.MouseButton1Down:Connect(function()
+    verticalInput = 1
+    isFlying = true
+end)
+
+upButton.MouseButton1Up:Connect(function()
+    verticalInput = 0
+end)
+
+downButton.MouseButton1Down:Connect(function()
+    verticalInput = -1
+    isFlying = true
+end)
+
+downButton.MouseButton1Up:Connect(function()
+    verticalInput = 0
+end)
+
+-- 飞行核心逻辑
+local FLY_SPEED = 50
+local TURN_SPEED = 0.15
+
+RunService.Heartbeat:Connect(function(dt)
+    if not rootPart or not humanoid then return end
+    
+    if isFlying then
+        -- 禁用重力
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        
+        -- 获取摄像机方向
+        local camera = workspace.CurrentCamera
+        local cameraCF = camera.CFrame
+        local cameraLook = cameraCF.LookVector
+        local cameraRight = cameraCF.RightVector
+        
+        -- 计算飞行方向（基于摇杆输入）
+        local moveDirection = 
+            (cameraLook * -joystickInput.Y) + 
+            (cameraRight * joystickInput.X) + 
+            Vector3.new(0, verticalInput, 0)
+        
+        -- 标准化方向并应用速度
+        if moveDirection.Magnitude > 0 then
+            moveDirection = moveDirection.Unit
+        end
+        
+        flyVelocity = moveDirection * FLY_SPEED
+        
+        -- 应用速度
+        rootPart.AssemblyLinearVelocity = flyVelocity
+        
+        -- 角色朝向（面向摄像机方向）
+        if cameraLook.Magnitude > 0 then
+            local lookDirection = Vector3.new(cameraLook.X, 0, cameraLook.Z).Unit
+            if lookDirection.Magnitude > 0 then
+                rootPart.CFrame = CFrame.new(
+                    rootPart.Position,
+                    rootPart.Position + lookDirection
+                )
+            end
+        end
+    else
+        -- 无输入时保持悬浮
+        if humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        end
+    end
+end)
+
+-- 初始状态设置
+humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+
+-- 清理时恢复
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+end)
+
+-- 退出飞行模式（可选）
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then
+        isFlying = not isFlying
+        if not isFlying then
+            joystickInput = Vector2.new(0, 0)
+            verticalInput = 0
+            joystickHandle.Position = UDim2.new(0.5, 0, 0.5, 0)
+        end
+    end
+end)
+
+-- 提示信息
+print("按 F 键切换飞行模式")
+print("使用屏幕摇杆控制方向，上下按钮控制高度")
