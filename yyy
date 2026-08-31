@@ -1,0 +1,556 @@
+-- ======================== 1. 加载 WindUI 库 ========================
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- ======================== 2. 环境准备 ========================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+
+-- 辅助函数（原脚本中的 null 用于调试输出，我们直接使用 print）
+local function null(...) print(...) end
+
+-- 获取核心模块
+local core
+pcall(function()
+    core = require(ReplicatedStorage:WaitForChild("Core", 9e9))
+end)
+
+-- 设置线程上下文（如果需要）
+local setthreadcontext = setthreadcontext or function(level) end
+
+-- ======================== 3. Hitbox Controls（完整移植） ========================
+local originalHitBox = nil
+getgenv().HitboxEnabled = false
+getgenv().HitboxLegitify = false
+getgenv().HitboxMethod = "Override"
+getgenv().Size1 = 40
+getgenv().Size2 = 40
+getgenv().Size3 = 40
+getgenv().HitboxVisualizer = false
+
+local function initializeHitbox()
+    if core and not originalHitBox then
+        local combat = core.Get("Combat", "Hit")
+        if combat and combat.Box then
+            originalHitBox = combat.Box
+        end
+    end
+end
+
+local function toggleHitbox(enabled)
+    if not core then return end
+    local combat = core.Get("Combat", "Hit")
+    if not combat then return end
+    getgenv().HitboxEnabled = enabled
+    if enabled then
+        if not originalHitBox then initializeHitbox() end
+        combat.Box = function(...)
+            local args = { ... }
+            if not args[3] or type(args[3]) ~= "table" then
+                return originalHitBox(...)
+            end
+            local newSize
+            if getgenv().HitboxMethod == "Add" then
+                local originalSize = args[3].Size or Vector3.new(0,0,0)
+                newSize = Vector3.new(
+                    originalSize.X + getgenv().Size1,
+                    originalSize.Y + getgenv().Size2,
+                    originalSize.Z + getgenv().Size3
+                )
+            else
+                newSize = Vector3.new(getgenv().Size1, getgenv().Size2, getgenv().Size3)
+            end
+            -- 可视化
+            if getgenv().HitboxVisualizer then
+                local cf = args[3].CFrame or args[3].cf or args[3].Frame
+                if not cf and typeof(args[2]) == "CFrame" then cf = args[2]
+                elseif not cf and typeof(args[2]) == "Instance" and args[2]:IsA("BasePart") then cf = args[2].CFrame end
+                if not cf then
+                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    cf = hrp and hrp.CFrame or CFrame.new()
+                end
+                local p = Instance.new("Part")
+                p.Name = "HitboxVisualizer"
+                p.Anchored = true
+                p.CanCollide = false
+                p.Material = Enum.Material.ForceField
+                p.Color = Color3.fromRGB(255,0,0)
+                p.Transparency = 0.7
+                p.Size = newSize
+                p.CFrame = cf
+                p.CastShadow = false
+                p.Parent = workspace
+                game:GetService("Debris"):AddItem(p, 0.08)
+            end
+            -- 调用原函数
+            if getgenv().HitboxLegitify then
+                local modifiedArg3 = {}
+                for k,v in pairs(args[3]) do modifiedArg3[k] = v end
+                modifiedArg3.Size = newSize
+                return originalHitBox(args[1], args[2], modifiedArg3)
+            else
+                return originalHitBox(args[1], args[2], { Size = newSize })
+            end
+        end
+    else
+        if originalHitBox then
+            combat.Box = originalHitBox
+        end
+    end
+end
+
+-- ======================== 4. Dash Patcher（完整移植） ========================
+-- 从原脚本完整提取的 runAttack 函数，所有依赖已调整
+local function runAttack(p_u_105, p_u_106, p107, p108)
+    local v_u_1 = core  -- 原脚本中的变量，现在指向 core
+    local v109 = v_u_1.Services.Camera.CFrame
+    local v110 = os.clock()
+    local v_u_111 = tostring(v110)
+    local v112 = 0
+    local v_u_113 = 0
+    local v_u_114 = 0
+    local v_u_115 = 0
+    local v_u_116, v_u_117, v_u_118, v_u_119, v_u_120
+    local v121, v122
+    local v_u_13, v_u_12 = false, false
+
+    local function v_u_135(p123, p124, p125, p126, p127)
+        local v128 = v_u_1.Get("Combat", "Ragdoll").GetRagdollFrame(p123)
+        local v129 = v_u_1.Get("Character", "FullCustomReplication").GetCFrame(p_u_105)
+        local v130 = v_u_1.Get("Character", "FullCustomReplication").GetCFrame(p123)
+        local v131 = not p125
+        if not v131 then
+            if v129 and v130 then
+                local v132 = p124 + v129.Position.Y - v130.Position.Y
+                v131 = math.abs(v132) < p125
+            end
+        end
+        local v133 = not p126
+        if v133 then
+            v128 = v133
+        elseif v128 then
+            v128 = v128.Velocity.Y < 0
+        end
+        local v134 = not p127
+        if v134 then
+            v130 = v134
+        elseif v129 and v130 then
+            v130 = v130.Position.Y > v129.Position.Y
+        end
+        if v131 then
+            if not v128 then
+                v130 = v128
+            end
+        else
+            v130 = v131
+        end
+        v_u_120 = v130
+        return v_u_120
+    end
+
+    local function v140(p136, p137)
+        local v138 = v_u_1.Get("Combat", "Ragdoll").GetRagdollFrame(p136)
+        local v139 = v_u_1.Get("Combat", "Ragdoll").UpVelocities[p136]
+        if v138 then
+            if v138.Velocity.Y < 0 and v139 then
+                v139 = v139 > 1 and p137.CollisionGroup ~= "NoCharacterCollisions"
+            else
+                v139 = false
+            end
+        end
+        return v139
+    end
+
+    local function v148(p141, p142, p143)
+        if v_u_1.Library("Instance").Exists(p_u_106) then
+            local v144, v145 = v_u_1.Get("Combat", "Hit").Box(nil, p_u_105, {
+                Size = p141,
+                Offset = p142,
+                IgnoreJump = true,
+                IgnoreRagdolls = "Ground",
+                IgnoreKnockback = true,
+                NoBaseValidation = true,
+                RequireInFront = true,
+                BlockHitsThroughWalls = true,
+                CustomValidation = p143,
+            })
+            v_u_117, v_u_116 = v144, v145
+            local v146, v147 = v_u_1.Get("Combat", "Hit").Box(nil, p_u_105, {
+                Size = p141,
+                Offset = p142,
+                IgnoreJump = true,
+                IgnoreRagdolls = "Ground",
+                IgnoreKnockback = true,
+                RequireInFront = true,
+                BlockHitsThroughWalls = true,
+                CustomValidation = p143,
+            })
+            v_u_119, v_u_118 = v146, v147
+            return #v_u_116 > 0
+        end
+    end
+
+    local v_u_149, v150, v151, v152 = v_u_119, v_u_114, v_u_113, v122
+    local v_u_153, v_u_154, v155 = v_u_120, v121, nil
+
+    local function v159(p156, p157)
+        local v158 = not p156:GetAttribute("Ragdoll") or v_u_135(p156, 2, 0.25, true)
+        if v158 then
+            v158 = p157.CollisionGroup ~= "NoCharacterCollisions"
+        end
+        return v158
+    end
+
+    while true do
+        task.wait()
+        local v160 = v_u_1.Services.Camera.CFrame
+        local _, v161, _ = v109:ToOrientation()
+        local _, v162, _ = v160:ToOrientation()
+        local v163 = v161 - v162
+        local v164 = math.deg(v163)
+        if v164 > 180 then
+            v164 = v164 - 360
+        elseif v164 < -180 then
+            v164 = v164 + 360
+        end
+
+        v112 += v164
+        v_u_113 = math.max(v151, v112)
+        v_u_114 = math.min(v150, v112)
+        v_u_115 = os.clock() - v110
+        local v165 = p107 - v_u_115
+
+        if v_u_115 > 0.2125 then
+            v121 = v148(Vector3.new(1, 1, 1), CFrame.new(0, 7.5, -0.5), v140)
+            v155 = v121 or v148(Vector3.new(5, 5, 4.5), CFrame.new(0, 0, -2), v159)
+            v_u_154 = v121
+        end
+
+        if v155 or p108 < v_u_115 then
+            local v_u_166 = v165 > 0 and true or v152
+            local v167 = v155 or v148(Vector3.new(7.5, 5, 7), CFrame.new(0, 0, -2.75), v159)
+            if v167 then
+                v_u_1.Get("Character", "Move").SetJumpOverride("DashPunch", 0)
+                task.delay(0.5, v_u_1.Get("Character", "Move").SetJumpOverride, "DashPunch", nil)
+            end
+
+            local function v188()
+                local v182 = {
+                    Guarantees = v_u_149,
+                    Replace = function(p168)
+                        local v169 = v_u_1.Get("Combat", "Knockback").CharacterPresets[p168] == "Uppercut"
+                                and 0.375
+                            or 0.2625
+
+                        local ok1, v170 = pcall(function()
+                            return v_u_1.Get("Combat", "Ragdoll").GetRagdoll(p168)
+                        end)
+                        if not ok1 then
+                            v170 = nil
+                        end
+                        local ok2, v170Frame = pcall(function()
+                            return v_u_1.Get("Combat", "Ragdoll").GetRagdollFrame(p168)
+                        end)
+                        if not ok2 then
+                            v170Frame = nil
+                        end
+
+                        local attrRagdoll = false
+                        if p168 and p168.GetAttribute then
+                            pcall(function()
+                                attrRagdoll = p168:GetAttribute("Ragdoll")
+                            end)
+                        end
+
+                        local isRagdolled = (v170 ~= nil) or (v170Frame ~= nil) or (attrRagdoll == true)
+
+                        local v172 = nil
+                        local ok4, gotCFrame = pcall(function()
+                            return p168 and v_u_1.Get("Character", "FullCustomReplication").GetCFrame(p168)
+                        end)
+                        if ok4 and gotCFrame then
+                            local tmp = p_u_106.CFrame:PointToObjectSpace(gotCFrame.Position)
+                            local v174 = tmp.X * 180 / 2
+                            v172 = p_u_106.CFrame * CFrame.Angles(0, math.rad(-math.clamp(v174, -180, 180)), 0)
+                        end
+
+                        local hasKB = false
+                        if p168 and p168.GetAttribute then
+                            local okKB, kbVal = pcall(function()
+                                return p168:GetAttribute("Knockback")
+                            end)
+                            if okKB and kbVal then
+                                hasKB = true
+                            end
+                        end
+
+                        if isRagdolled then
+                            return { ActionNumbers = { 2, 6 }, ForceDirection = v172 }
+                        end
+
+                        if v_u_115 < v169 then
+                            if p168 and p168.SetAttribute then
+                                pcall(function()
+                                    p168:SetAttribute("Knockback", false)
+                                end)
+                            end
+                            return { ActionNumbers = { 1, 6 }, ForceDirection = nil }
+                        end
+
+                        local v179
+                        if v_u_113 - v_u_114 > 180 then
+                            v179 = not v170 or v_u_135(p168, 0, 2, nil, true)
+                        else
+                            v179 = false
+                        end
+                        local v180 = false
+                        local v181 = v_u_166
+                        if v181 then
+                            v181 = not v170
+                        end
+
+                        if v180 then
+                            if v170 then
+                                v170 = v_u_154
+                            end
+                        else
+                            v170 = v180
+                        end
+                        if v180 then
+                            v180 = not v170
+                        end
+
+                        if v_u_115 >= v169 then
+                            pcall(function()
+                                if p168 and p168.SetAttribute then
+                                    p168:SetAttribute("Knockback", false)
+                                end
+                            end)
+                        end
+
+                        local pick = 1
+                        if hasKB then
+                            pick = 5
+                        elseif v181 then
+                            pick = 4
+                        elseif v180 then
+                            pick = 3
+                        elseif v170 then
+                            pick = 2
+                        else
+                            pick = 1
+                        end
+
+                        return { ActionNumbers = { pick, 6 }, ForceDirection = v181 and v172 }
+                    end,
+                    UseFromCFrame = v_u_166 and p_u_106.CFrame * CFrame.new(0, 0, -2) or nil,
+                }
+
+                task.wait(0.15)
+                v_u_12 = true
+                local v183, v184, _, _, v185 =
+                    v_u_1.Get("Combat", "Action").Event(nil, p_u_105, "PunchDash", v_u_111, v182, 0)
+                if v183 then
+                    v_u_1.Get("Combat", "Dash").vfx("DashHit", v183, p_u_106.Position)
+                    v_u_1.Get("Camera", "Shake").Shake(nil, nil, {
+                        Amplitude = 1.25,
+                        Frequency = 0.0875,
+                        FadeInTime = 0.025,
+                        FadeOutTime = 0.5,
+                    }, nil, p_u_105, table.unpack(v184))
+                end
+                local v186 = false
+                for _, v187 in v185 and (v185.BlockedCharacters or {}) or {} do
+                    if not table.find(v185.HitCharacters, v187) then
+                        v186 = true
+                    end
+                end
+                v_u_13 = v186
+                v_u_12 = false
+            end
+
+            task.spawn(v188)
+            if v165 > 0 then
+                v_u_1.Services.Run.Heartbeat:Wait()
+                task.wait(v165 + 0.025)
+            end
+            task.spawn(v_u_1.Get("Combat", "Dash").punchAnimation, p_u_105, v_u_111)
+            return v165 > 0, v167
+        end
+        v150, v151, v109 = v_u_114, v_u_113, v160
+    end
+end
+
+-- 钩子管理
+local runAttackHooked = false
+local originalRunAttack = nil
+local targetRunAttackFunc = nil
+
+local function enableLegitKombat()
+    if runAttackHooked then return end
+    local targetScript = LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("Combat"):WaitForChild("Dash")
+    for i, v in pairs(getgc(true)) do
+        if typeof(v) == "function" then
+            local scr = getfenv(v).script
+            if scr == targetScript and debug.getinfo(v).name == "runAttack" then
+                targetRunAttackFunc = v
+                originalRunAttack = hookfunction(v, runAttack)
+                runAttackHooked = true
+                getgenv().LegitKombatEnabled = true
+                break
+            end
+        end
+    end
+end
+
+local function disableLegitKombat()
+    if not runAttackHooked or not originalRunAttack or not targetRunAttackFunc then return end
+    hookfunction(targetRunAttackFunc, originalRunAttack)
+    runAttackHooked = false
+    getgenv().LegitKombatEnabled = false
+    targetRunAttackFunc = nil
+    originalRunAttack = nil
+end
+
+-- ======================== 5. 构建 WindUI 界面 ========================
+local Window = WindUI:CreateWindow({
+    Title = "Hitbox + Dash Patcher",
+    Icon = "rbxassetid://78342669010819",
+    Keybind = Enum.KeyCode.LeftAlt,
+    Size = UDim2.new(0, 500, 0, 450),
+})
+
+local CombatTab = Window:CreateTab({
+    Name = "Combat",
+    Icon = "rbxassetid://10723416765",
+})
+
+-- Hitbox 部分
+local HitboxSection = CombatTab:CreateSection({
+    Name = "Hitbox Controls",
+    Side = "Left",
+})
+
+HitboxSection:CreateToggle({
+    Text = "Enable Hitbox",
+    Default = false,
+    Callback = function(v)
+        getgenv().HitboxEnabled = v
+        toggleHitbox(v)
+    end,
+})
+
+HitboxSection:CreateToggle({
+    Text = "Legitify",
+    Default = false,
+    Callback = function(v)
+        getgenv().HitboxLegitify = v
+        if getgenv().HitboxEnabled then
+            toggleHitbox(false)
+            toggleHitbox(true)
+        end
+    end,
+})
+
+HitboxSection:CreateDropdown({
+    Text = "Method",
+    Options = { "Override", "Add" },
+    Default = "Override",
+    Callback = function(v)
+        getgenv().HitboxMethod = v
+        if getgenv().HitboxEnabled then
+            toggleHitbox(false)
+            toggleHitbox(true)
+        end
+    end,
+})
+
+HitboxSection:CreateSlider({
+    Text = "X Size",
+    Min = 1,
+    Max = 250,
+    Default = 40,
+    Callback = function(v)
+        getgenv().Size1 = v
+        if getgenv().HitboxEnabled then
+            toggleHitbox(false)
+            toggleHitbox(true)
+        end
+    end,
+})
+
+HitboxSection:CreateSlider({
+    Text = "Y Size",
+    Min = 1,
+    Max = 250,
+    Default = 40,
+    Callback = function(v)
+        getgenv().Size2 = v
+        if getgenv().HitboxEnabled then
+            toggleHitbox(false)
+            toggleHitbox(true)
+        end
+    end,
+})
+
+HitboxSection:CreateSlider({
+    Text = "Z Size",
+    Min = 1,
+    Max = 250,
+    Default = 40,
+    Callback = function(v)
+        getgenv().Size3 = v
+        if getgenv().HitboxEnabled then
+            toggleHitbox(false)
+            toggleHitbox(true)
+        end
+    end,
+})
+
+HitboxSection:CreateToggle({
+    Text = "Hitbox Visualizer",
+    Default = false,
+    Callback = function(v)
+        getgenv().HitboxVisualizer = v
+    end,
+})
+
+-- Dash Patcher 部分
+local LegitSection = CombatTab:CreateSection({
+    Name = "Legit Kombat",
+    Side = "Right",
+})
+
+LegitSection:CreateToggle({
+    Text = "Enable Dash Patcher",
+    Default = false,
+    Callback = function(v)
+        if v then
+            enableLegitKombat()
+        else
+            disableLegitKombat()
+        end
+    end,
+})
+
+LegitSection:CreateLabel({
+    Text = "Dash Patcher increases the success rate of LoopDash and BoneDash.",
+})
+
+-- ======================== 6. 初始化 ========================
+task.spawn(function()
+    task.wait(1)
+    initializeHitbox()
+end)
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(2)
+    initializeHitbox()
+end)
+
+print("WindUI 完整版加载成功！按 LeftAlt 打开菜单。")
