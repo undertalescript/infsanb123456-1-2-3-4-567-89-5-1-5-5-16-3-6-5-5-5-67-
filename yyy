@@ -1,279 +1,601 @@
--- ======================== Compkiller UI 库（完整） ========================
-local CompKillerLib = [[
--- 这里粘贴你原脚本开头的整个 CompKillerLib 字符串（从 local CompKillerLib = [[ 到最后的 ]]）
--- 为了节省篇幅，此处省略，实际使用时请将原脚本开头的 CompKillerLib 完整复制过来。
--- 或者你可以直接使用原脚本，但下面我提供了独立加载的方式。
-]]
--- 如果你已经有 Compkiller 库的加载方式，可以替换上面的字符串。
-local Compkiller = loadstring(CompKillerLib)()
+local WindUI = loadstring(game:HttpGet(
+    "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+))()
 
--- ======================== 核心功能实现 ========================
+-- 服务
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- 获取核心模块（用于 Hitbox 修改）
-local core
-pcall(function()
-    core = require(ReplicatedStorage:WaitForChild("Core", 9e9))
-end)
-
--- -------------------- Hitbox Controls --------------------
-local originalHitBox = nil
-getgenv().HitboxEnabled = false
-getgenv().HitboxLegitify = false
-getgenv().HitboxMethod = "Override"
-getgenv().Size1 = 40
-getgenv().Size2 = 40
-getgenv().Size3 = 40
-getgenv().HitboxVisualizer = false
-
-local function initializeHitbox()
-    if core and not originalHitBox then
-        local combat = core.Get("Combat", "Hit")
-        if combat and combat.Box then
-            originalHitBox = combat.Box
-        end
-    end
-end
-
-local function toggleHitbox(enabled)
-    if not core then return end
-    local combat = core.Get("Combat", "Hit")
-    if not combat then return end
-    getgenv().HitboxEnabled = enabled
-    if enabled then
-        if not originalHitBox then initializeHitbox() end
-        combat.Box = function(...)
-            local args = { ... }
-            if not args[3] or type(args[3]) ~= "table" then
-                return originalHitBox(...)
-            end
-            local newSize
-            if getgenv().HitboxMethod == "Add" then
-                local originalSize = args[3].Size or Vector3.new(0,0,0)
-                newSize = Vector3.new(
-                    originalSize.X + getgenv().Size1,
-                    originalSize.Y + getgenv().Size2,
-                    originalSize.Z + getgenv().Size3
-                )
-            else
-                newSize = Vector3.new(getgenv().Size1, getgenv().Size2, getgenv().Size3)
-            end
-            -- 可视化
-            if getgenv().HitboxVisualizer then
-                local cf = args[3].CFrame or args[3].cf or args[3].Frame
-                if not cf and typeof(args[2]) == "CFrame" then cf = args[2]
-                elseif not cf and typeof(args[2]) == "Instance" and args[2]:IsA("BasePart") then cf = args[2].CFrame end
-                if not cf then
-                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    cf = hrp and hrp.CFrame or CFrame.new()
-                end
-                local p = Instance.new("Part")
-                p.Name = "HitboxVisualizer"
-                p.Anchored = true
-                p.CanCollide = false
-                p.Material = Enum.Material.ForceField
-                p.Color = Color3.fromRGB(255,0,0)
-                p.Transparency = 0.7
-                p.Size = newSize
-                p.CFrame = cf
-                p.CastShadow = false
-                p.Parent = workspace
-                game:GetService("Debris"):AddItem(p, 0.08)
-            end
-            -- 调用原函数
-            if getgenv().HitboxLegitify then
-                local modifiedArg3 = {}
-                for k,v in pairs(args[3]) do modifiedArg3[k] = v end
-                modifiedArg3.Size = newSize
-                return originalHitBox(args[1], args[2], modifiedArg3)
-            else
-                return originalHitBox(args[1], args[2], { Size = newSize })
-            end
-        end
-    else
-        if originalHitBox then
-            combat.Box = originalHitBox
-        end
-    end
-end
-
--- -------------------- Enable Dash Patcher --------------------
-local runAttackHooked = false
-local originalRunAttack = nil
-local targetRunAttackFunc = nil
-
--- 自定义 runAttack（简化版，保留核心修正逻辑）
-local function customRunAttack(p_u_105, p_u_106, p107, p108)
-    -- 这里为了简洁，只保留关键修正代码，实际可参考原脚本完整实现。
-    -- 我们直接调用原函数并增强判定，但为了演示，这里使用原脚本中完整的 runAttack 函数。
-    -- 由于原脚本中的 runAttack 很长，此处我们假设用户会从原脚本中复制过来。
-    -- 但为了独立可用，我将嵌入一个简化版本（仅做示例）。
-    -- 实际使用建议直接使用原脚本的完整函数。
-    warn("Dash Patcher 已启用，但自定义 runAttack 需从原脚本完整复制。")
-    -- 这里只是占位，实际运行时请将原脚本中的 runAttack 函数复制到这里。
-end
-
-local function enableLegitKombat()
-    if runAttackHooked then return end
-    local targetScript = LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("Combat"):WaitForChild("Dash")
-    for i, v in pairs(getgc(true)) do
-        if typeof(v) == "function" then
-            local scr = getfenv(v).script
-            if scr == targetScript and debug.getinfo(v).name == "runAttack" then
-                targetRunAttackFunc = v
-                originalRunAttack = hookfunction(v, customRunAttack)
-                runAttackHooked = true
-                getgenv().LegitKombatEnabled = true
-                break
-            end
-        end
-    end
-end
-
-local function disableLegitKombat()
-    if not runAttackHooked or not originalRunAttack or not targetRunAttackFunc then return end
-    hookfunction(targetRunAttackFunc, originalRunAttack)
-    runAttackHooked = false
-    getgenv().LegitKombatEnabled = false
-    targetRunAttackFunc = nil
-    originalRunAttack = nil
-end
-
--- ======================== 构建 UI ========================
-local Window = Compkiller.new({
-    Name = "Hitbox + Dash Patcher",
-    Keybind = "LeftAlt",
-    Logo = "rbxassetid://78342669010819",  -- 随便一个图标
-    Scale = Compkiller.Scale.Window,
-    TextSize = 15,
+-- 创建窗口
+local Window = WindUI:CreateWindow({
+    Title = "初脚本",
+    Icon = "home",
+    Author = "kick79",
+    Folder = "ZhongErScript",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
+    Background = "https://pictureurl.com/api/storage/file?key=u%2Fanon%2F95c138c9-c7e1-4aa8-ba18-d6917862d75d-R.png",
 })
 
-local CombatContainer = Window:DrawContainerTab({ Name = "Combat", Icon = "skull" })
-local Tab1 = CombatContainer:DrawTab({ Name = "Main", Type = "Double" })
+-- ==================== 标签页 ====================
 
--- Hitbox Controls
-local HitboxSection = Tab1:DrawSection({ Name = "Hitbox Controls", Position = "left" })
-HitboxSection:AddToggle({
-    Name = "Enable Hitbox",
-    Flag = "HitboxToggle",
+local 感谢Tab = Window:Tab({
+    Name = "感谢大家",
+    Icon = "heart",
+})
+
+local 通用Tab = Window:Tab({
+    Name = "通用功能",
+    Icon = "shield",
+})
+
+local 整合Tab = Window:Tab({
+    Name = "脚本整合",
+    Icon = "star",
+})
+
+local 玩家Tab = Window:Tab({
+    Name = "玩家设置",
+    Icon = "user",
+})
+
+-- ==================== 感谢大家 Tab ====================
+
+local 常用Section = 感谢Tab:Section({
+    Name = "常用",
+})
+
+常用Section:Button({
+    Name = "飞行",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/ZBzcTm1f"))()
+    end,
+})
+
+常用Section:Button({
+    Name = "通用自瞄",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/1Gp9c57U"))()
+    end,
+})
+
+常用Section:Button({
+    Name = "速度 (数值25)",
+    Callback = function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 25
+    end,
+})
+
+常用Section:Button({
+    Name = "点击传送",
+    Callback = function()
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local tool = Instance.new("Tool")
+        tool.RequiresHandle = false
+        tool.Name = "Click TP"
+        tool.Activated:Connect(function()
+            local pos = mouse.Hit + Vector3.new(0, 2.5, 0)
+            pos = CFrame.new(pos.X, pos.Y, pos.Z)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+        end)
+        tool.Parent = game.Players.LocalPlayer.Backpack
+    end,
+})
+
+常用Section:Button({
+    Name = "透视",
+    Callback = function()
+        loadstring(game:GetObjects("rbxassetid://10092697033")[1].Source)()
+    end,
+})
+
+常用Section:Button({
+    Name = "高画质",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/jHBfJYmS"))()
+    end,
+})
+
+-- ==================== 通用功能 Tab ====================
+
+local 通用Section = 通用Tab:Section({
+    Name = "通用",
+})
+
+通用Section:Button({
+    Name = "无限跳跃",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/V5PQy3y0", true))()
+    end,
+})
+
+通用Section:Button({
+    Name = "透视 (所有玩家)",
+    Callback = function()
+        loadstring(game:GetObjects("rbxassetid://10092697033")[1].Source)()
+    end,
+})
+
+通用Section:Button({
+    Name = "飞车",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/63T0fkBm"))()
+    end,
+})
+
+通用Section:Button({
+    Name = "隐身道具",
+    Callback = function()
+        loadstring(game:HttpGet("https://gist.githubusercontent.com/skid123skidlol/cd0d2dce51b3f20ad1aac941da06a1a1/raw/f58b98cce7d51e53ade94e7bb460e4f24fb7e0ff/%257BFE%257D%2520Invisible%2520Tool%2520(can%2520hold%2520tools)", true))()
+    end,
+})
+
+通用Section:Button({
+    Name = "穿墙陀螺仪",
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/r97d7dS0', true))()
+    end,
+})
+
+通用Section:Toggle({
+    Name = "夜视",
     Default = false,
-    Callback = function(v)
-        getgenv().HitboxEnabled = v
-        toggleHitbox(v)
-    end,
-})
-
-HitboxSection:AddToggle({
-    Name = "Legitify",
-    Flag = "HitboxLegitify",
-    Default = false,
-    Callback = function(v)
-        getgenv().HitboxLegitify = v
-        if getgenv().HitboxEnabled then
-            toggleHitbox(false)
-            toggleHitbox(true)
-        end
-    end,
-})
-
-HitboxSection:AddDropdown({
-    Name = "Method",
-    Flag = "HitboxMethod",
-    Default = "Override",
-    Values = { "Override", "Add" },
-    Callback = function(v)
-        getgenv().HitboxMethod = v
-        if getgenv().HitboxEnabled then
-            toggleHitbox(false)
-            toggleHitbox(true)
-        end
-    end,
-})
-
-HitboxSection:AddSlider({
-    Name = "X Size",
-    Min = 1,
-    Max = 250,
-    Default = 40,
-    Flag = "HitboxX",
-    Callback = function(v)
-        getgenv().Size1 = v
-        if getgenv().HitboxEnabled then
-            toggleHitbox(false)
-            toggleHitbox(true)
-        end
-    end,
-})
-HitboxSection:AddSlider({
-    Name = "Y Size",
-    Min = 1,
-    Max = 250,
-    Default = 40,
-    Flag = "HitboxY",
-    Callback = function(v)
-        getgenv().Size2 = v
-        if getgenv().HitboxEnabled then
-            toggleHitbox(false)
-            toggleHitbox(true)
-        end
-    end,
-})
-HitboxSection:AddSlider({
-    Name = "Z Size",
-    Min = 1,
-    Max = 250,
-    Default = 40,
-    Flag = "HitboxZ",
-    Callback = function(v)
-        getgenv().Size3 = v
-        if getgenv().HitboxEnabled then
-            toggleHitbox(false)
-            toggleHitbox(true)
-        end
-    end,
-})
-
-HitboxSection:AddToggle({
-    Name = "Hitbox Visualizer",
-    Flag = "HitboxVisualizer",
-    Default = false,
-    Callback = function(v)
-        getgenv().HitboxVisualizer = v
-    end,
-})
-
--- Dash Patcher
-local LegitSection = Tab1:DrawSection({ Name = "Legit Kombat", Position = "right" })
-LegitSection:AddToggle({
-    Name = "Enable Dash Patcher",
-    Flag = "DashPatcherToggle",
-    Default = false,
-    Callback = function(v)
-        if v then
-            enableLegitKombat()
+    Callback = function(Value)
+        if Value then
+            game.Lighting.Ambient = Color3.new(1, 1, 1)
         else
-            disableLegitKombat()
+            game.Lighting.Ambient = Color3.new(0, 0, 0)
         end
     end,
 })
 
--- ======================== 初始化 ========================
-task.spawn(function()
-    task.wait(1)
-    initializeHitbox()
-end)
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(2)
-    initializeHitbox()
-end)
+-- 速度和无限跳 + 穿墙
+通用Section:Button({
+    Name = "速度和无限跳 (按E穿墙)",
+    Callback = function()
+        -- 无限跳
+        local InfiniteJumpEnabled = true
+        game:GetService("UserInputService").JumpRequest:Connect(function()
+            if InfiniteJumpEnabled then
+                game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+        end)
 
--- 水印（可选）
-local Watermark = Window:Watermark()
-Watermark:AddText({ Icon = "user", Text = LocalPlayer.Name })
-Watermark:AddText({ Icon = "server", Text = "Hitbox+Dash Patcher" })
+        -- 速度
+        local tspeed = 50
+        local hb = game:GetService("RunService").Heartbeat
+        local tpwalking = true
+        local lplr = game:GetService("Players").LocalPlayer
+        local chr = lplr.Character
+        local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+        spawn(function()
+            while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                if hum.MoveDirection.Magnitude > 0 then
+                    chr:TranslateBy(hum.MoveDirection * tonumber(tspeed))
+                end
+            end
+        end)
 
-print("Hitbox + Dash Patcher 已加载！按 LeftAlt 打开菜单。")
+        -- 穿墙
+        local noclip = false
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local mouse = player:GetMouse()
+
+        mouse.KeyDown:Connect(function(key)
+            if key == "e" then
+                noclip = not noclip
+            end
+        end)
+
+        spawn(function()
+            while true do
+                character = player.Character
+                if noclip and character then
+                    for _, v in pairs(character:GetDescendants()) do
+                        pcall(function()
+                            if v:IsA("BasePart") then
+                                v.CanCollide = false
+                            end
+                        end)
+                    end
+                end
+                game:GetService("RunService").Stepped:Wait()
+            end
+        end)
+    end,
+})
+
+-- 传送观战
+通用Section:Button({
+    Name = "传送 / 观战",
+    Callback = function()
+        local function GetPlayer(String)
+            local Found = {}
+            for i, v in pairs(game.Players:GetPlayers()) do
+                if v.Name:lower():sub(1, #String) == String:lower() then
+                    table.insert(Found, v.Name)
+                end
+            end
+            return Found
+        end
+
+        -- 创建GUI
+        local PrisonRuinerGui = Instance.new("ScreenGui")
+        local Frame = Instance.new("Frame")
+        local TextLabel = Instance.new("TextLabel")
+        local Kill = Instance.new("TextButton")
+        local Merge = Instance.new("TextButton")
+        local Kick = Instance.new("TextButton")
+        local KillAll = Instance.new("TextButton")
+        local Sword = Instance.new("TextButton")
+        local Player = Instance.new("TextBox")
+        local TextLabel_2 = Instance.new("TextLabel")
+        local Line = Instance.new("TextLabel")
+        local Spectate = Instance.new("TextButton")
+        local Goto = Instance.new("TextButton")
+        local Unspectate = Instance.new("TextButton")
+
+        PrisonRuinerGui.Name = "PrisonRuinerGui"
+        PrisonRuinerGui.Parent = game.CoreGui
+        PrisonRuinerGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+        Frame.Active = true
+        Frame.Draggable = true
+        Frame.Parent = PrisonRuinerGui
+        Frame.BackgroundColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        Frame.BorderSizePixel = 0
+        Frame.Position = UDim2.new(0.05, 0, 0.47, 0)
+        Frame.Size = UDim2.new(0, 337, 0, 319)
+
+        TextLabel.Parent = Frame
+        TextLabel.BackgroundColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+        TextLabel.BorderSizePixel = 0
+        TextLabel.Size = UDim2.new(0, 337, 0, 42)
+        TextLabel.Font = Enum.Font.Cartoon
+        TextLabel.Text = "传送 / 观战 GUI"
+        TextLabel.TextColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        TextLabel.TextScaled = true
+
+        Player.Parent = Frame
+        Player.BackgroundColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+        Player.BorderSizePixel = 0
+        Player.Position = UDim2.new(0.202, 0, 0.609, 0)
+        Player.Size = UDim2.new(0, 200, 0, 33)
+        Player.Font = Enum.Font.Cartoon
+        Player.PlaceholderText = "输入玩家名"
+        Player.Text = ""
+        Player.TextColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        Player.TextScaled = true
+
+        Spectate.Parent = Frame
+        Spectate.BackgroundColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+        Spectate.BorderSizePixel = 0
+        Spectate.Position = UDim2.new(0.058, 0, 0.429, 0)
+        Spectate.Size = UDim2.new(0, 131, 0, 33)
+        Spectate.Font = Enum.Font.Cartoon
+        Spectate.Text = "观战"
+        Spectate.TextColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        Spectate.TextScaled = true
+
+        Goto.Parent = Frame
+        Goto.BackgroundColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+        Goto.BorderSizePixel = 0
+        Goto.Position = UDim2.new(0.552, 0, 0.431, 0)
+        Goto.Size = UDim2.new(0, 131, 0, 33)
+        Goto.Font = Enum.Font.Cartoon
+        Goto.Text = "传送过去"
+        Goto.TextColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        Goto.TextScaled = true
+
+        Unspectate.Parent = Frame
+        Unspectate.BackgroundColor3 = Color3.new(0.784314, 0.784314, 0.784314)
+        Unspectate.BorderSizePixel = 0
+        Unspectate.Position = UDim2.new(0.551, 0, 0.856, 0)
+        Unspectate.Size = UDim2.new(0, 131, 0, 33)
+        Unspectate.Font = Enum.Font.Cartoon
+        Unspectate.Text = "取消观战"
+        Unspectate.TextColor3 = Color3.new(0.196078, 0.196078, 0.196078)
+        Unspectate.TextScaled = true
+
+        Spectate.MouseButton1Click:Connect(function()
+            for i, v in pairs(GetPlayer(Player.Text)) do
+                workspace.CurrentCamera.CameraSubject = game.Players[v].Character.Humanoid
+            end
+        end)
+
+        Goto.MouseButton1Click:Connect(function()
+            for i, v in pairs(GetPlayer(Player.Text)) do
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players[v].Character.HumanoidRootPart.CFrame
+            end
+        end)
+
+        Unspectate.MouseButton1Click:Connect(function()
+            workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+        end)
+    end,
+})
+
+-- 自定义范围
+通用Section:Button({
+    Name = "自定义攻击范围",
+    Callback = function()
+        local Open2 = Instance.new("ScreenGui")
+        local Open = Instance.new("TextButton")
+        local FightingGui = Instance.new("ScreenGui")
+        local main = Instance.new("Frame")
+        local Cre = Instance.new("TextLabel")
+        local HitBox = Instance.new("TextBox")
+        local Red = Instance.new("TextBox")
+        local Green = Instance.new("TextBox")
+        local Blue = Instance.new("TextBox")
+        local Close = Instance.new("TextButton")
+
+        Open2.Name = "Tools"
+        Open2.Parent = game.CoreGui
+
+        Open.Parent = Open2
+        Open.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        Open.Position = UDim2.new(0, 0, 0.45, 0)
+        Open.Size = UDim2.new(0, 78, 0, 50)
+        Open.Font = Enum.Font.SourceSans
+        Open.Text = "范围GUI"
+        Open.TextColor3 = Color3.fromRGB(250, 0, 0)
+        Open.TextScaled = true
+        Open.MouseButton1Down:Connect(function()
+            FightingGui.Enabled = true
+        end)
+
+        FightingGui.Name = "FightingGui"
+        FightingGui.Parent = game.CoreGui
+
+        main.Parent = FightingGui
+        main.Active = true
+        main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        main.Position = UDim2.new(0.073, 0, 0.237, 0)
+        main.Size = UDim2.new(0, 273, 0, 221)
+        main.Draggable = true
+
+        Cre.Parent = main
+        Cre.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        Cre.Position = UDim2.new(0, 0, -0.226, 0)
+        Cre.Size = UDim2.new(0, 273, 0, 50)
+        Cre.Font = Enum.Font.SourceSans
+        Cre.Text = "攻击范围脚本"
+        Cre.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Cre.TextScaled = true
+
+        HitBox.Parent = main
+        HitBox.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        HitBox.Position = UDim2.new(0.058, 0, 0.099, 0)
+        HitBox.Size = UDim2.new(0, 65, 0, 50)
+        HitBox.Font = Enum.Font.SourceSans
+        HitBox.PlaceholderText = "范围数值"
+        HitBox.Text = ""
+        HitBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+        HitBox.TextScaled = true
+
+        Red.Parent = main
+        Red.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        Red.Position = UDim2.new(0.485, 0, 0.099, 0)
+        Red.Size = UDim2.new(0, 37, 0, 31)
+        Red.PlaceholderText = "红"
+        Red.Text = ""
+        Red.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Red.TextSize = 14
+
+        Green.Parent = main
+        Green.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        Green.Position = UDim2.new(0.665, 0, 0.099, 0)
+        Green.Size = UDim2.new(0, 37, 0, 31)
+        Green.PlaceholderText = "绿"
+        Green.Text = ""
+        Green.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Green.TextSize = 14
+
+        Blue.Parent = main
+        Blue.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+        Blue.Position = UDim2.new(0.837, 0, 0.099, 0)
+        Blue.Size = UDim2.new(0, 37, 0, 31)
+        Blue.PlaceholderText = "蓝"
+        Blue.Text = ""
+        Blue.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Blue.TextSize = 14
+
+        Close.Parent = main
+        Close.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        Close.Position = UDim2.new(1, 0, -0.226, 0)
+        Close.Size = UDim2.new(0, 60, 0, 50)
+        Close.Text = "X"
+        Close.TextColor3 = Color3.fromRGB(0, 0, 0)
+        Close.TextScaled = true
+        Close.MouseButton1Down:Connect(function()
+            FightingGui.Enabled = false
+        end)
+
+        game:GetService('RunService').RenderStepped:Connect(function()
+            for i, v in next, game:GetService('Players'):GetPlayers() do
+                if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+                    pcall(function()
+                        v.Character.HumanoidRootPart.Size = Vector3.new(HitBox.Text, HitBox.Text, HitBox.Text)
+                        v.Character.HumanoidRootPart.Transparency = 0.8
+                        v.Character.HumanoidRootPart.Color = Color3.new(Red.Text, Green.Text, Blue.Text)
+                        v.Character.HumanoidRootPart.Material = "Neon"
+                        v.Character.HumanoidRootPart.CanCollide = false
+                    end)
+                end
+            end
+        end)
+    end,
+})
+
+通用Section:Button({
+    Name = "子弹追踪",
+    Callback = function()
+        local Camera = game:GetService("Workspace").CurrentCamera
+        local Players = game:GetService("Players")
+        local LocalPlayer = game:GetService("Players").LocalPlayer
+
+        local function GetClosestPlayer()
+            local ClosestPlayer = nil
+            local FarthestDistance = math.huge
+            for i, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local Dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                    if Dist < FarthestDistance then
+                        FarthestDistance = Dist
+                        ClosestPlayer = v
+                    end
+                end
+            end
+            return ClosestPlayer
+        end
+
+        local GameMetaTable = getrawmetatable(game)
+        local OldNamecall = GameMetaTable.__namecall
+        setreadonly(GameMetaTable, false)
+        GameMetaTable.__namecall = newcclosure(function(object, ...)
+            local Method = getnamecallmethod()
+            local Args = {...}
+            if tostring(Method) == "FindPartOnRayWithIgnoreList" then
+                local ClosestPlayer = GetClosestPlayer()
+                if ClosestPlayer and ClosestPlayer.Character then
+                    Args[1] = Ray.new(Camera.CFrame.Position, (ClosestPlayer.Character.Head.Position - Camera.CFrame.Position).Unit * (Camera.CFrame.Position - ClosestPlayer.Character.Head.Position).Magnitude)
+                end
+            end
+            return OldNamecall(object, unpack(Args))
+        end)
+        setreadonly(GameMetaTable, true)
+    end,
+})
+
+通用Section:Button({
+    Name = "蜘蛛爬行",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zXk4Rq2r"))()
+    end,
+})
+
+通用Section:Button({
+    Name = "变黑色恶魔",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/tTyiBiqe", true))()
+    end,
+})
+
+通用Section:Button({
+    Name = "动作包",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingScripter/Animation-Hub/main/Animation%20Gui", true))()
+    end,
+})
+
+通用Section:Button({
+    Name = "空中行走",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Float'))()
+    end,
+})
+
+通用Section:Button({
+    Name = "防踢",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Anti-Kick/main/Anti%20Kick.lua"))()
+    end,
+})
+
+-- ==================== 玩家设置 Tab ====================
+
+local 玩家Section = 玩家Tab:Section({
+    Name = "角色设置",
+})
+
+玩家Section:Slider({
+    Name = "移动速度",
+    Min = 16,
+    Max = 500,
+    Default = 16,
+    Callback = function(Value)
+        pcall(function()
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        end)
+    end,
+})
+
+玩家Section:Slider({
+    Name = "跳跃高度",
+    Min = 50,
+    Max = 1000,
+    Default = 50,
+    Callback = function(Value)
+        pcall(function()
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+        end)
+    end,
+})
+
+-- ==================== 脚本整合 Tab ====================
+
+local 整合Section = 整合Tab:Section({
+    Name = "游戏专用脚本",
+})
+
+整合Section:Button({
+    Name = "键盘 (手机用)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
+    end,
+})
+
+整合Section:Button({
+    Name = "造船寻宝",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/XRoLLu/UWU/main/BUILD%20A%20BOAT%20FOR%20TREASURE.lua'))()
+    end,
+})
+
+整合Section:Button({
+    Name = "鲨口求生",
+    Callback = function()
+        loadstring(game:HttpGet('https://ppearl.vercel.app'))()
+    end,
+})
+
+整合Section:Button({
+    Name = "能力战争",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/VxleLUA/Dynamic-Offical/main/System/GameChecker.lua"))()
+    end,
+})
+
+整合Section:Button({
+    Name = "越狱",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/piglex9/icetray3/main/latest.lua"))()
+    end,
+})
+
+整合Section:Button({
+    Name = "夺旗战争",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Infinity2346/Tect-Menu/main/Flag%20Wars.txt'))()
+    end,
+})
+
+整合Section:Button({
+    Name = "巨人模拟器",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ToraIsMe/ToraIsMe/main/0giant", true))()
+    end,
+})
+
+整合Section:Button({
+    Name = "洞穴 HitBox扩展器",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))()
+    end,
+})
